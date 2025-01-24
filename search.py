@@ -28,8 +28,10 @@ def aStar(graph, start_index, end_index, x_y_start, x_y_end) -> dict:
         for next in graph[current]:
             x_y_current = (current // 10, current % 10)
             x_y_neighbor = (next // 10, next % 10)
-            new_cost = cost_so_far[current] + \
+            new_cost = (
+                cost_so_far[current] +
                 ManhattanDistance(x_y_current, x_y_neighbor)
+            )
 
             if next not in cost_so_far or new_cost < cost_so_far[next]:
                 cost_so_far[next] = new_cost

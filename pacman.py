@@ -57,8 +57,10 @@ class Pacman:
         self.forage = Forage()
 
     def setup(self):
-        self.res_x, self.res_y = ctypes.windll.user32.GetSystemMetrics(
-            0), ctypes.windll.user32.GetSystemMetrics(1)
+        self.res_x, self.res_y = (
+            ctypes.windll.user32.GetSystemMetrics(0),
+            ctypes.windll.user32.GetSystemMetrics(1),
+        )
         self.wn.bgcolor("black")
         self.wn.title("Pacman Game")
         self.wn.setup(width=.99, height=.90, startx=0, starty=0)
@@ -69,18 +71,27 @@ class Pacman:
 
     def discoverMaze(self, x_pos, y_pos):
         if (x_pos+24, y_pos) in self.space:
-            self.map_graph[self.space.index((x_pos, y_pos))].append(
-                self.space.index((x_pos+24, y_pos)))
+            (
+                self.map_graph[self.space.index((x_pos, y_pos))]
+                .append(self.space.index((x_pos+24, y_pos)))
+            )
         if (x_pos-24, y_pos) in self.space:
-            self.map_graph[self.space.index((x_pos, y_pos))].append(
-                self.space.index((x_pos-24, y_pos)))
+            (
+                self.map_graph[self.space.index((x_pos, y_pos))]
+                .append(self.space.index((x_pos-24, y_pos)))
+            )
         if (x_pos, y_pos+24) in self.space:
-            self.map_graph[self.space.index((x_pos, y_pos))].append(
-                self.space.index((x_pos, y_pos+24)))
+            (
+                self.map_graph[self.space.index((x_pos, y_pos))]
+                .append(self.space.index((x_pos, y_pos+24)))
+            )
         if (x_pos, y_pos-24) in self.space:
-            self.map_graph[self.space.index((x_pos, y_pos))].append(
-                self.space.index((x_pos, y_pos-24)))
-        last_index = self.space.index((x_pos, y_pos))+1
+            (
+                self.map_graph[self.space.index((x_pos, y_pos))]
+                .append(self.space.index((x_pos, y_pos-24)))
+            )
+
+        last_index = self.space.index((x_pos, y_pos)) + 1
         if last_index != len(self.space):
             x_y_pos = self.space[last_index]
             self.discoverMaze(x_y_pos[0], x_y_pos[1])
@@ -110,8 +121,9 @@ class Pacman:
                     self.sprite.speed(1)
                     self.sprite.goto(screen_x, screen_y)
                     self.first_pacman_position = (screen_x, screen_y)
-                    self.sprite.pen(fillcolor="black",
-                                    pencolor="yellow", pensize=2)
+                    self.sprite.pen(
+                        fillcolor="black", pencolor="yellow", pensize=2,
+                    )
                     self.space.append((screen_x, screen_y))
                 else:
                     self.space.append((screen_x, screen_y))
@@ -123,8 +135,7 @@ class Pacman:
 
     def find_nearest_food(self, start_position):
         foods_list = self.forages.copy()
-        temp_list = []
-        result_list = []
+        temp_list, result_list = [], []
 
         for _ in range(len(self.forages)):
 
@@ -145,10 +156,18 @@ class Pacman:
         last_forages_index = 0
         for i in priority_food:
             search.path_list.clear()
-            aStar_came_from = search.aStar(self.map_graph, last_forages_index, self.space.index(
-                self.forages[i]), (self.sprite.xcor(), self.sprite.ycor()), (self.forages[i]))
-            search.traverse_back(aStar_came_from,
-                                 self.space.index(self.forages[i]), last_forages_index)
+            aStar_came_from = search.aStar(
+                graph=self.map_graph,
+                start_index=last_forages_index,
+                end_index=self.space.index(self.forages[i]),
+                x_y_start=(self.sprite.xcor(), self.sprite.ycor()),
+                x_y_end=(self.forages[i]),
+            )
+            search.traverse_back(
+                came_from=aStar_came_from,
+                end_index=self.space.index(self.forages[i]),
+                start_position=last_forages_index,
+            )
             last_forages_index = self.space.index(self.forages[i])
             self.move(search.path_list, last_forages_index)
 
